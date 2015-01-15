@@ -2,14 +2,14 @@ module.exports = function(grunt){
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         path: {
-          root: "dev/",
-          css: "dev/css/",
-          scss: "dev/scss/",
-          js: "dev/js/",
-          html: "dev/views/",
-          haml: "dev/views/haml/",
-          deployCss: "dev/css/",
-          deployJs: "dev/js/",
+          root: "",
+          css: "css/",
+          scss: "scss/",
+          js: "js/",
+          html: "views/",
+          haml: "views/haml/",
+          deployCss: "css/",
+          deployJs: "js/",
           host: "alignmenthealthcare.gscadmin.com"
         },
         sass:{
