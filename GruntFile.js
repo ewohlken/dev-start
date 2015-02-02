@@ -8,58 +8,44 @@ module.exports = function(grunt){
           js: "js/",
           html: "views/",
           haml: "views/haml/",
+          sprite: "images/sprites/",
           deployCss: "css/",
           deployJs: "js/",
-          host: "alignmenthealthcare.gscadmin.com"
+          host: " "
         },
-        sass:{
+        compass:{
             app: {
                 options: {
-                    style: 'expanded'
-                },
-                files: [
-                    {
-                        "<%= path.css %>app.css" : "<%= path.scss %>app.scss",
-                        "<%= path.css %>app-ie.css" : "<%= path.scss %>app-ie.scss"
-                    }
-                ]
-            },
-            foundation: {
-              options: {
-                style: 'expanded'
-              },
-              files: [
-                {   "<%= path.css %>foundation.css" : '<%= path.scss %>foundation.scss' }
-              ]
+                    cssDir: '<%= path.css %>',
+                    sassDir: '<%= path.scss %>',
+                    outputStyle: 'expanded',
+                    require: 'sass-globbing',
+                    sourcemap: true
+                }
             }
         },
         watch: {
-            app: {
-              options: {
-                livereload: true
-              },
-              files: [
-                '**/app.scss',
-                '**/app.css',
-                '**/app-ie.css',
-                '**/app-ie.scss',
-                '**/js/app.js'
-              ],
-              tasks:[
-                'app'
-              ]
+            scss: {
+                options: {
+                  livereload: true
+                },
+                files: [
+                  '<%= path.scss =%>**/*.scss'
+                ],
+                tasks:[
+                  'app'
+                ]
             },
-            foundation: {
-              options: {
-                livereload: true
-              },
-              files: [
-                '**/foundation.scss',
-                '**/foundation/*.scss'
-              ],
-              tasks:[
-                'foundation'
-              ]
+            livereload: {
+                options: {
+                  livereload: true
+                },
+                files: [
+                  '<%= path.html =%>**/*.html',
+                  '<%= path.js =%>**/*.js',
+                  '<%= path.css =%>**/*.css'
+                ],
+                tasks:[]
             }
         },
         'ftp-deploy': {
@@ -72,16 +58,6 @@ module.exports = function(grunt){
               src: '<%= path.css %>',
               dest: '<%= path.deployCss %>',
               exclusions: ['<%= path.css %>foundation.css.map', '<%= path.css %>foundation.css']
-            },
-            foundation: {
-              auth: {
-                host: '<%= path.host %>',
-                port: 21,
-                authKey: 'key1'
-              },
-              src: '<%= path.css %>',
-              dest: '<%= path.deployCss %>',
-              exclusions: ['<%= path.css %>app-ie.css','<%= path.css %>app.css', '<%= path.css %>app.css.map', '<%= path.css %>app-ie.css.map']
             },
             all: {
               auth: {
@@ -96,9 +72,9 @@ module.exports = function(grunt){
         },
         sprite:{
             all: {
-                src: '<%= path.root %>sprites/*.png',
-                destImg: '<%= path.root %>images/sprites/sprites.png',
-                destCSS: '<%= path.root %>images/sprites/sprites.css'
+                src: '<%= path.sprite =%>*.png',
+                destImg: '<%= path.sprite =%>sprites.png',
+                destCSS: '<%= path.scss =%>partials/_sprites.scss'
             }
         },
         haml: {
@@ -123,20 +99,30 @@ module.exports = function(grunt){
             src: ['*.html'],
             dest: '<%=path.html%>'
           }
+        },
+        'http-server': {
+
+          'dev': {
+
+            // the server root directory
+            root: '<%=path.root%>',
+
+            port: 8282,
+
+            host: "127.0.0.1",
+            ext: "html",
+            runInBackground: true
+          }
         }
     });
 
-    grunt.loadNpmTasks('grunt-contrib-sass');
-    grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-ftp-deploy');
-    grunt.loadNpmTasks('grunt-spritesmith');
-    grunt.loadNpmTasks('grunt-haml');
-    grunt.loadNpmTasks('grunt-prettify');
+    require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
-    grunt.registerTask('foundation', 'Compiles and Deploys foundation', ['sass:foundation','ftp-deploy:foundation']);
-    grunt.registerTask('app', 'Compiles and Deploys app', ['sass:app','ftp-deploy:app']);
-    grunt.registerTask('html', 'Compiles and Prettifies HAML', ['haml','prettify']);
+    grunt.registerTask('scss', 'Compiles scss', ['compass:app']);
+    grunt.registerTask('app', 'Compiles and Deploys css', ['sass:app','ftp-deploy:css']);
+    grunt.registerTask('html', 'Compiles HAML into HTML, the prettifies', ['haml','prettify']);
+    grunt.registerTask('js', 'Deploys js', 'ftp-deploy:js');
+    grunt.registerTask('css', 'Deploys css', 'ftp-deploy:css');
 
-    grunt.registerTask('default', ['watch:app']);
-  require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTas
+    grunt.registerTask('default', ['http-server:dev', 'watch']);
 }
